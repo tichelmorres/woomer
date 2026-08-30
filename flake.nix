@@ -3,9 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-
     systems.url = "github:nix-systems/default";
-
     crane.url = "github:ipetkov/crane";
   };
 
@@ -21,8 +19,6 @@
         pkgs = nixpkgs.legacyPackages.${system};
         craneLib = crane.mkLib pkgs;
 
-        # Common arguments can be set here to avoid repeating them later
-        # Note: changes here will rebuild all dependency crates
         commonArgs =
           let
             buildInputs = (with pkgs; [
@@ -30,21 +26,19 @@
               glfw
               libgbm
             ]) ++ (
-              with pkgs.xorg; [
-              libX11.dev
-              libXrandr.dev
-              libXinerama.dev
-              libXcursor.dev
-              libXi.dev
-            ]);
-
-            craneLib = crane.mkLib pkgs;
+              with pkgs; [
+                libX11.dev
+                libXrandr.dev
+                libXinerama.dev
+                libXcursor.dev
+                libXi.dev
+              ]);
           in {
             src = let
-                shaderFilter = path: _type: builtins.match ".*fs$" path != null;
-                shaderOrCargo = path: type:
-                  (shaderFilter path type) || (craneLib.filterCargoSources path type);
-              in
+              shaderFilter = path: _type: builtins.match ".*fs$" path != null;
+              shaderOrCargo = path: type:
+                (shaderFilter path type) || (craneLib.filterCargoSources path type);
+            in
               pkgs.lib.cleanSourceWith {
                 src = craneLib.path ./.;
                 filter = shaderOrCargo;

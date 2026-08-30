@@ -203,12 +203,6 @@ fn main() {
             spotlight_radius_multiplier_uniform_location =
                 spotlight_shader.get_shader_location("spotlightRadiusMultiplier");
         }
-        if rl.is_key_pressed(KeyboardKey::KEY_LEFT_CONTROL)
-            || rl.is_key_pressed(KeyboardKey::KEY_RIGHT_CONTROL)
-        {
-            spotlight_radius_multiplier = radius_multiplier * 3.0;
-            spotlight_radius_multiplier_delta = -15.0;
-        }
         if rl.is_key_pressed(KeyboardKey::KEY_F) {
             enable_spotlight = !enable_spotlight;
         }

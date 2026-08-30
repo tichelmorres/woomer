@@ -13,7 +13,7 @@ Zoomer application for wayland (linux) inspired by [tsoding's boomer](https://gi
 | Press <kbd>F</kbd>                                        | Toggle flashlight effect.                    |
 | Drag with left mouse button                               | Move the image around.                       |
 | Scroll wheel                                              | Zoom in/out.                                 |
-| <kbd>Ctrl</kbd> + <kbd>SHIFT</kbd> + Scroll wheel         | Change the radius of the flashlight.         |
+| <kbd>SHIFT</kbd> + Scroll wheel                           | Change the radius of the flashlight.         |
 
 ## HiDPI Displays
 ### Hyprland
