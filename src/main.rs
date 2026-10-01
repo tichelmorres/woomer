@@ -133,14 +133,6 @@ fn main() {
         .position(|o| o.name == display_output.name)
         .expect("Monitor not found");
 
-    unsafe {
-        ToggleFullscreen();
-    }
-
-    unsafe {
-        SetWindowMonitor(idx as i32);
-    }
-
     let screenshot_texture = rl
         .load_texture_from_image(&thread, &screenshot_image)
         .expect("failed to load screenshot into a texture");
@@ -184,7 +176,17 @@ fn main() {
         spotlight_shader.get_shader_location("spotlightRadiusMultiplier");
     let mut should_exit = false;
     let mut enable_spotlight = false;
+    let mut should_exit = false;
+    let mut frame = 0u32; 
     while !rl.window_should_close() && !should_exit {
+        // Frame 1 is too early to fullscreen in dwl
+        frame += 1;
+        if frame == 2 {
+            unsafe {
+                ToggleFullscreen();
+                SetWindowMonitor(idx as i32);
+            }
+        }
         // We check for A and Q due to differences between AZERTY and QWERTY keyboard layouts
         if rl.is_key_pressed(KeyboardKey::KEY_Q) || rl.is_key_pressed(KeyboardKey::KEY_A) {
             should_exit = true;
