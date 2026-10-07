@@ -5,9 +5,13 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     systems.url = "github:nix-systems/default";
     crane.url = "github:ipetkov/crane";
+    nixGL = {
+      url = "github:nix-community/nixGL";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, systems, crane, ... }:
+  outputs = { self, nixpkgs, systems, crane, nixGL, ... }:
     let
       forEachSystem = nixpkgs.lib.genAttrs (import systems);
     in {
@@ -54,9 +58,10 @@
             LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
             LIBCLANG_PATH = pkgs.libclang.lib + "/lib/";
           };
-      in {
-        woomer = self.packages.${system}.default;
-        default = craneLib.buildPackage (commonArgs // {
+
+        # The raw crane build, without the nixGL wrapper
+        woomer-unwrapped = craneLib.buildPackage (commonArgs // {
+          pname = "woomer";
           cargoArtifacts = craneLib.buildDepsOnly commonArgs;
 
           postFixup = ''
@@ -73,13 +78,25 @@
             mainProgram = "woomer";
           };
         });
+
+        woomer-wrapped = pkgs.writeShellScriptBin "woomer" ''
+          export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [ pkgs.mesa pkgs.libglvnd pkgs.wayland ]}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          export __EGL_VENDOR_LIBRARY_FILENAMES="${pkgs.mesa}/share/glvnd/egl_vendor.d/50_mesa.json"
+          export LIBGL_DRIVERS_PATH="${pkgs.mesa}/lib/dri"
+          export GBM_BACKENDS_PATH="${pkgs.mesa}/lib/gbm"
+          exec ${woomer-unwrapped}/bin/woomer "$@"
+        '';
+      in {
+        inherit woomer-unwrapped;
+        woomer = woomer-wrapped;
+        default = woomer-wrapped;
       });
 
-      apps = forEachSystem (system: let
-        pkgs = nixpkgs.legacyPackages.${system};
-      in {
-        type = "app";
-        program = pkgs.lib.getExe self.packages.${system}.default;
+      apps = forEachSystem (system: {
+        default = {
+          type = "app";
+          program = "${self.packages.${system}.default}/bin/woomer";
+        };
       });
 
       devShells = forEachSystem (system: let
@@ -92,11 +109,11 @@
             rust-analyzer
           ];
           env = {
-            inherit (self.packages.${system}.default)
+            inherit (self.packages.${system}.woomer-unwrapped)
               LIBCLANG_PATH LD_LIBRARY_PATH;
           };
           inputsFrom = [
-            self.packages.${system}.default
+            self.packages.${system}.woomer-unwrapped
           ];
         };
       });
