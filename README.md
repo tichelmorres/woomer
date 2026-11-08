@@ -61,7 +61,7 @@ You can also install woomer using the nix flake:
 # flake.nix
 {
   inputs = {
-    woomer.url = "github:coffeeispower/woomer";
+    woomer.url = "github:tichelmorres/woomer";
     # .....
   }
   # ....
