@@ -154,7 +154,7 @@ fn main() {
     let mut delta_scale = 0f64;
     let mut scale_pivot = rl.get_mouse_position();
     let mut velocity = Vector2::default();
-    let mut spotlight_radius_multiplier = 1.0;
+    let mut spotlight_radius_multiplier = radius_multiplier;
     let mut spotlight_radius_multiplier_delta = 0.0;
     let mut mirror = false;
     #[cfg(feature = "dev")]
@@ -174,7 +174,6 @@ fn main() {
     cursor_position_uniform_location = spotlight_shader.get_shader_location("cursorPosition");
     spotlight_radius_multiplier_uniform_location =
         spotlight_shader.get_shader_location("spotlightRadiusMultiplier");
-    let mut should_exit = false;
     let mut enable_spotlight = false;
     let mut should_exit = false;
     let mut frame = 0u32; 
